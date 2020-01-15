@@ -1,17 +1,17 @@
 # Copyright 2010 Noam Yorav-Raphael
 #
 # This file is part of DreamPie.
-# 
+#
 # DreamPie is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # DreamPie is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with DreamPie.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -57,12 +57,12 @@ gladefile = path.join(data_dir, 'dreampie.glade')
 def load_pygtk():
     """On win32, load PyGTK from subdirectory, if available."""
     from os.path import join, dirname, abspath
-    
+
     if hasattr(sys, 'frozen'):
         pygtk_dir = join(dirname(abspath(sys.executable)), 'gtk-2.0')
     else:
         pygtk_dir = join(dirname(dirname(dirname(abspath(__file__)))), 'gtk-2.0')
-    
+
     if os.path.isdir(pygtk_dir):
         sys.path.insert(0, pygtk_dir)
         import runtime #@UnresolvedImport
@@ -111,7 +111,6 @@ from .file_dialogs import save_dialog
 from .tags import (OUTPUT, STDIN, STDOUT, STDERR, EXCEPTION, PROMPT, COMMAND,
                    COMMAND_DEFS, COMMAND_SEP, MESSAGE, RESULT_IND, RESULT)
 from . import tags
-from .update_check import update_check
 from . import bug_report
 
 INDENT_WIDTH = 4
@@ -147,9 +146,9 @@ class DreamPie(SimpleGladeApp):
         SimpleGladeApp.__init__(self, gladefile, 'window_main')
         self.load_popup_menus()
         self.set_mac_accelerators()
-        
+
         self.config = Config()
-        
+
         if self.config.get_bool('start-rpdb2-embedded'):
             print 'Starting rpdb2 embedded debugger...',
             sys.stdout.flush()
@@ -174,14 +173,14 @@ class DreamPie(SimpleGladeApp):
         self.sourcebuffer = self.sourceview.get_buffer()
         # A tuple (page_num, text) of the recently closed tab
         self.reopen_tab_data = None
-        
+
         # last (font, vertical_layout) configured. If they are changed,
         # configure() will resize the window and place the paned.
         self.last_configured_layout = (None, None)
         self.configure()
 
         self.output = Output(self.textview)
-        
+
         self.folding = Folding(self.textbuffer, LINE_LEN)
 
         self.selection = Selection(self.textview, self.sourceview,
@@ -206,7 +205,7 @@ class DreamPie(SimpleGladeApp):
         self.histpersist = HistPersist(self.window_main, self.textview,
                                        self.status_bar, self.recent_manager)
         self.update_recent()
-        
+
         self.autocomplete = Autocomplete(self.sourceview,
                                          self.sv_changed,
                                          self.window_main,
@@ -218,17 +217,17 @@ class DreamPie(SimpleGladeApp):
                                          self.complete_filenames,
                                          self.complete_dict_keys,
                                          INDENT_WIDTH)
-        
+
         # Hack: we connect this signal here, so that it will have lower
         # priority than the key-press event of autocomplete, when active.
         self.sourceview_keypress_handler = self.sourceview.connect(
             'key-press-event', self.on_sourceview_keypress)
         self.sv_changed.append(self.on_sv_changed)
-        
+
         self.call_tips = CallTips(self.sourceview, self.sv_changed,
                                   self.window_main, self.get_func_doc,
                                   INDENT_WIDTH)
-        
+
         self.autoparen = Autoparen(self.sourcebuffer, self.sv_changed,
                                    self.is_callable_only,
                                    self.get_expects_str,
@@ -254,12 +253,12 @@ class DreamPie(SimpleGladeApp):
 
         # Is the subprocess executing a command
         self.set_is_executing(False)
-        
+
         # Are we trying to shut down
         self.is_terminating = False
 
         self.window_main.show()
-        
+
         self.subp_welcome, self.subp_can_mask_sigint = (
             self.call_subp(u'get_subprocess_info'))
         self.show_welcome()
@@ -271,23 +270,21 @@ class DreamPie(SimpleGladeApp):
             self.show_getting_started_dialog()
             self.config.set_bool('show-getting-started', False)
             self.config.save()
-        
-        update_check(self.on_update_available)
-        
+
     def on_sv_changed(self, new_sv):
         self.sourceview.disconnect(self.sourceview_keypress_handler)
         self.sourceview = new_sv
         self.sourcebuffer = new_sv.get_buffer()
         self.sourceview_keypress_handler = self.sourceview.connect(
             'key-press-event', self.on_sourceview_keypress)
-    
+
     def load_popup_menus(self):
         # Load popup menus from the glade file. Would not have been needed if
         # popup menus could be children of windows.
         xml = glade.XML(gladefile, 'popup_sel_menu')
         xml.signal_autoconnect(self)
         self.popup_sel_menu = xml.get_widget('popup_sel_menu')
-        
+
         xml = glade.XML(gladefile, 'popup_nosel_menu')
         xml.signal_autoconnect(self)
         self.popup_nosel_menu = xml.get_widget('popup_nosel_menu')
@@ -295,7 +292,7 @@ class DreamPie(SimpleGladeApp):
         self.copy_section_menu = xml.get_widget('copy_section_menu')
         self.view_section_menu = xml.get_widget('view_section_menu')
         self.save_section_menu = xml.get_widget('save_section_menu')
-    
+
     def set_mac_accelerators(self):
         # Set up accelerators suitable for the Mac.
         # Ctrl-Up and Ctrl-Down are taken by the window manager, so we use
@@ -303,7 +300,7 @@ class DreamPie(SimpleGladeApp):
         # We want it to be easy to switch, so both sets of keys are always
         # active, but only one, most suitable for each platform, is displayed
         # in the menu.
-        
+
         accel_group = gtk.accel_groups_from_object(self.window_main)[0]
         menu_up = self.menuitem_history_up
         UP = gdk.keyval_from_name('Up')
@@ -323,7 +320,7 @@ class DreamPie(SimpleGladeApp):
                                     gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
             menu_up.add_accelerator('activate', accel_group, UP,
                                     gdk.CONTROL_MASK, 0)
-    
+
             menu_dn.remove_accelerator(accel_group, DN, gdk.CONTROL_MASK)
             menu_dn.add_accelerator('activate', accel_group, PGDN,
                                     gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
@@ -351,7 +348,7 @@ class DreamPie(SimpleGladeApp):
     def find(self, is_upward):
         tb = self.textbuffer
         sb = self.sourcebuffer
-        
+
         search_str = get_text(sb, sb.get_start_iter(), sb.get_end_iter())
         if not search_str:
             self.status_bar.set_status(_(
@@ -359,7 +356,7 @@ class DreamPie(SimpleGladeApp):
                 "press Ctrl-F"))
             beep()
             return
-        
+
         if tb.get_has_selection():
             sel_start, sel_end = tb.get_selection_bounds()
             it = sel_start if is_upward else sel_end
@@ -367,7 +364,7 @@ class DreamPie(SimpleGladeApp):
             it = tb.get_iter_at_mark(tb.get_insert())
         else:
             it = tb.get_end_iter()
-        
+
         flags = gtk.TEXT_SEARCH_VISIBLE_ONLY
         if is_upward:
             match = it.backward_search(search_str, flags)
@@ -377,7 +374,7 @@ class DreamPie(SimpleGladeApp):
             match = it.forward_search(search_str, flags)
             if match is None:
                 match = tb.get_start_iter().forward_search(search_str, flags)
-        
+
         if match is None:
             beep()
         else:
@@ -415,7 +412,7 @@ class DreamPie(SimpleGladeApp):
         # I don't know why +1
         charheight = pango.PIXELS(metrics.get_ascent() + metrics.get_descent())+1
         return charwidth, charheight
-    
+
     def set_window_size(self, vertical_layout):
         charwidth, charheight = self.get_char_width_height()
         if vertical_layout:
@@ -426,7 +423,7 @@ class DreamPie(SimpleGladeApp):
             width = charwidth*((LINE_LEN-10)*2+2)
             height = charheight*26
         self.window_main.resize(width, height)
-        
+
         # Set the position of the paned. We wait until it is exposed because
         # then its max_position is meaningful.
         # In vertical layout we set it to maximum, since the sourceview has
@@ -458,7 +455,7 @@ class DreamPie(SimpleGladeApp):
         scroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         scroll.add(sv)
         scroll.set_size_request(-1, charheight * 4)
-        
+
         lbl = gtk.Label('      ')
         if page_num is None:
             page_num = self.notebook.get_current_page() + 1
@@ -488,7 +485,7 @@ class DreamPie(SimpleGladeApp):
             commands = self.selection.get_commands_only()
             self.sourcebuffer.insert_interactive_at_cursor(commands, True)
             return True
-    
+
     def write(self, data, *tag_names):
         self.textbuffer.insert_with_tags_by_name(
             self.textbuffer.get_end_iter(), data, *tag_names)
@@ -500,7 +497,7 @@ class DreamPie(SimpleGladeApp):
         it = self.output.write(data, tag_names, onnewline, addbreaks)
         if self.config.get_bool('autofold'):
             self.folding.autofold(it, self.config.get_int('autofold-numlines'))
-    
+
     def set_is_executing(self, is_executing):
         self.is_executing = is_executing
         label = _(u'Execute Code') if not is_executing else _(u'Write Input')
@@ -513,7 +510,7 @@ class DreamPie(SimpleGladeApp):
         # in order to fix bug #525469 - replace fancy quotes with regular
         # quotes.
         return source.replace(u'\xa8', '"').replace(u'\xb4', "'")
-    
+
     def execute_source(self):
         """Execute the source in the source buffer.
         """
@@ -536,7 +533,7 @@ class DreamPie(SimpleGladeApp):
             self.status_bar.set_status(_("The subprocess is currently busy"))
             beep()
             return
-            
+
         is_ok, syntax_error_info = self.call_subp(u'execute', source)
         if not is_ok:
             if syntax_error_info:
@@ -609,7 +606,7 @@ class DreamPie(SimpleGladeApp):
                 # is_executing
                 self.send_stdin()
                 return True
-                
+
         # If we are after too many newlines, the user probably just wanted to
         # execute - notify him.
         # We check if this line is empty and the previous one is.
@@ -635,7 +632,7 @@ class DreamPie(SimpleGladeApp):
     def on_sourceview_kp_enter(self):
         self.on_execute_command(None)
         return True
-        
+
     @sourceview_keyhandler('Tab', 0)
     def on_sourceview_tab(self):
         sb = self.sourcebuffer
@@ -644,12 +641,12 @@ class DreamPie(SimpleGladeApp):
             insert = sb.get_iter_at_mark(sb.get_insert())
             insert_linestart = sb.get_iter_at_line(insert.get_line())
             line = get_text(sb, insert_linestart, insert)
-    
+
             if not line.strip():
                 # We are at the beginning of a line, so indent - forward to next
                 # "tab stop"
                 sb.insert_at_cursor(' '*(INDENT_WIDTH - len(line)%INDENT_WIDTH))
-    
+
             else:
                 # Completion should come here
                 self.autocomplete.show_completions(is_auto=False, complete=True)
@@ -705,7 +702,7 @@ class DreamPie(SimpleGladeApp):
                 insert.forward_char()
             sb.place_cursor(insert)
             return True
-    
+
     @sourceview_keyhandler('BackSpace', 0)
     def on_sourceview_backspace(self):
         sb = self.sourcebuffer
@@ -767,7 +764,7 @@ class DreamPie(SimpleGladeApp):
 
 
     # Autoparen
-    
+
     @sourceview_keyhandler('space', 0)
     def on_sourceview_space(self):
         """
@@ -777,15 +774,15 @@ class DreamPie(SimpleGladeApp):
             return False
         if not self.config.get_bool('autoparen'):
             return False
-        
+
         return self.autoparen.add_parens()
 
     def is_callable_only(self, expr):
         return self.call_subp_catch(u'is_callable_only', expr)
-    
+
     def get_expects_str(self):
         return set(self.config.get('expects-str-2').split())
-    
+
     def autoparen_show_call_tip(self):
         self.call_tips.show(is_auto=True)
 
@@ -812,26 +809,26 @@ class DreamPie(SimpleGladeApp):
 
     def configure_subp(self):
         config = self.config
-        
+
         if config.get_bool('use-reshist'):
             reshist_size = config.get_int('reshist-size')
         else:
             reshist_size = 0
         self.call_subp(u'set_reshist_size', reshist_size)
         self.menuitem_clear_reshist.props.sensitive = (reshist_size > 0)
-        
+
         self.call_subp(u'set_pprint', config.get_bool('pprint'))
-        
+
         self.call_subp(u'set_matplotlib_ia',
                        config.get_bool('matplotlib-ia-switch'),
                        config.get_bool('matplotlib-ia-warn'))
-        
+
     def run_init_code(self, runfile=None):
         """
         Runs the init code.
         This will result in the code being run and a '>>>' printed afterwards.
         If there's no init code, will just print '>>>'.
-        
+
         If runfile is given, will also execute the code in that.
         """
         init_code = unicode(eval(self.config.get('init-code')))
@@ -890,10 +887,10 @@ class DreamPie(SimpleGladeApp):
         Make an RPC call, blocking until an answer is received.
         """
         assert not self.is_executing
-        
+
         while self._n_unclaimed_results:
             self.subp.recv_object()
-            
+
         self.subp.send_object((funcname, args))
         return self.subp.recv_object()
 
@@ -905,14 +902,14 @@ class DreamPie(SimpleGladeApp):
         becomes responsive again, but will be discarded.
         """
         assert not self.is_executing
-        
+
         while self._n_unclaimed_results:
             returned = self.subp.wait_for_object(SUBP_WAIT_TIMEOUT_S)
             if returned:
                 self.subp.recv_object()
             else:
                 raise TimeoutError
-            
+
         self.subp.send_object((funcname, args))
         returned = self.subp.wait_for_object(SUBP_WAIT_TIMEOUT_S)
         if returned:
@@ -933,12 +930,12 @@ class DreamPie(SimpleGladeApp):
             return self.call_subp_noblock(funcname, *args)
         except TimeoutError:
             return None
-    
+
     def on_object_recv(self, obj):
         if self._n_unclaimed_results:
             self._n_unclaimed_results -= 1
             return
-        
+
         assert self.is_executing
 
         is_success, val_no, val_str, exception_string, rem_stdin = obj
@@ -1012,21 +1009,21 @@ class DreamPie(SimpleGladeApp):
             beep()
 
     # History persistence
-    
+
     def on_save_history(self, _widget):
         self.histpersist.save()
-    
+
     def on_save_history_as(self, _widget):
         self.histpersist.save_as()
-    
+
     def on_load_history(self, _widget):
         self.histpersist.load()
-    
+
     # Recent history files
-    
+
     def on_recent_manager_changed(self, _recent_manager):
         self.update_recent()
-    
+
     def update_recent(self):
         """Update the menu and self.recent_filenames"""
         rman = self.recent_manager
@@ -1048,21 +1045,21 @@ class DreamPie(SimpleGladeApp):
             else:
                 menuitem.props.visible = False
                 self.recent_filenames[i] = None
-    
+
     def on_menuitem_recent(self, widget):
         num = self.menuitem_recent.index(widget)
         fn = self.recent_filenames[num]
         self.histpersist.load_filename(fn)
-    
+
     # Discard history
-    
+
     def discard_hist_before_tag(self, tag):
         """
         Discard history before the given tag. If tag == COMMAND, this discards
         all history, and if tag == MESSAGE, this discards previous sessions.
         """
         tb = self.textbuffer
-        
+
         tag = tb.get_tag_table().lookup(tag)
         it = tb.get_end_iter()
         it.backward_to_tag_toggle(tag)
@@ -1080,10 +1077,10 @@ class DreamPie(SimpleGladeApp):
         all_rad = xml.get_widget('all_rad')
         previous_rad.set_group(all_rad)
         previous_rad.props.active = True
-        
+
         r = d.run()
         d.destroy()
-        
+
         if r == gtk.RESPONSE_OK:
             tb = self.textbuffer
             if previous_rad.props.active:
@@ -1098,7 +1095,7 @@ class DreamPie(SimpleGladeApp):
             self.histpersist.forget_filename()
 
     # Folding
-    
+
     def on_section_menu_activate(self, widget):
         """
         Called when the used clicked a section-related item in a popup menu.
@@ -1111,7 +1108,7 @@ class DreamPie(SimpleGladeApp):
             # popup and activation
             return
         typ, is_folded, start_it = r
-        
+
         if widget is self.fold_unfold_section_menu:
             # Fold/Unfold
             if is_folded is None:
@@ -1150,7 +1147,7 @@ class DreamPie(SimpleGladeApp):
                             self.main_widget, _("All Files"), "*", None)
             else:
                 assert False, "Unexpected widget"
-            
+
     def spawn_and_forget(self, argv):
         """
         Start a process and forget about it.
@@ -1168,7 +1165,7 @@ class DreamPie(SimpleGladeApp):
                 os.waitpid(pid, 0)
         else:
             _p = subprocess.Popen(argv, shell=True)
-    
+
     def on_double_click(self, event):
         """If we are on a folded section, unfold it and return True, to
         avoid event propagation."""
@@ -1186,20 +1183,20 @@ class DreamPie(SimpleGladeApp):
             if is_folded:
                 self.folding.unfold(typ, start_it)
                 return True
-    
+
     def on_fold_last(self, _widget):
         self.folding.fold_last()
-    
+
     def on_unfold_last(self, _widget):
         self.folding.unfold_last()
 
     # Notebook tabs
-    
+
     def on_notebook_switch_page(self, _widget, _page, page_num):
         new_sv = self.notebook.get_nth_page(page_num).get_child()
         for cb in self.sv_changed:
             cb(new_sv)
-    
+
     def new_tab(self, index=None):
         # The following line should result in on_notebook_switch_page, which
         # will take care of calling on_sv_change functions.
@@ -1207,22 +1204,22 @@ class DreamPie(SimpleGladeApp):
         self.notebook.props.show_tabs = True
         self.reopen_tab_data = None
         self.menuitem_reopen_tab.props.sensitive = False
-    
+
     def on_new_tab(self, _widget):
         self.new_tab()
-    
+
     def on_reopen_tab(self, _widget):
         index, text = self.reopen_tab_data
         self.new_tab(index)
         self.sourcebuffer.set_text(text)
-    
+
     def on_close_tab(self, _widget):
         if self.notebook.get_n_pages() == 1:
             beep()
             return
         else:
             self.close_current_tab()
-    
+
     def close_current_tab(self):
         assert self.notebook.get_n_pages() > 1
         cur_page = self.notebook.get_current_page()
@@ -1254,13 +1251,13 @@ class DreamPie(SimpleGladeApp):
             scrolledwin.destroy()
             gc.collect()
             assert r() is None
-    
+
     def on_prev_tab(self, _widget):
         self.notebook.prev_page()
-    
+
     def on_next_tab(self, _widget):
         self.notebook.next_page()
-    
+
     # Other events
 
     def on_show_completions(self, _widget):
@@ -1274,16 +1271,16 @@ class DreamPie(SimpleGladeApp):
 
     def complete_firstlevels(self):
         return self.call_subp_catch(u'complete_firstlevels')
-    
+
     def get_func_args(self, expr):
         return self.call_subp_catch(u'get_func_args', expr)
-    
+
     def find_modules(self, expr):
         return self.call_subp_catch(u'find_modules', expr)
-    
+
     def get_module_members(self, expr):
         return self.call_subp_catch(u'get_module_members', expr)
-    
+
     def complete_filenames(self, str_prefix, text, str_char, add_quote):
         return self.call_subp_catch(u'complete_filenames', str_prefix, text, str_char,
                                     add_quote)
@@ -1303,7 +1300,7 @@ class DreamPie(SimpleGladeApp):
         tv = self.textview; tb = self.textbuffer
         sourceviews = [self.notebook.get_nth_page(i).get_child()
                        for i in range(self.notebook.get_n_pages())]
-        
+
         font_name = config.get('font')
         font = pango.FontDescription(font_name)
         tv.modify_font(font)
@@ -1329,13 +1326,13 @@ class DreamPie(SimpleGladeApp):
             child2 = other_pane.get_child2(); other_pane.remove(child2)
             pane.pack1(child1, resize=True, shrink=False)
             pane.pack2(child2, resize=not vertical_layout, shrink=False)
-        
+
         # If the fonts were changed, we might need to enlarge the window
         last_font, last_vertical = self.last_configured_layout
         if last_font != font or last_vertical != vertical_layout:
             self.set_window_size(vertical_layout)
             self.last_configured_layout = font, vertical_layout
-        
+
         command_defs = self.textbuffer.get_tag_table().lookup(COMMAND_DEFS)
         command_defs.props.invisible = config.get_bool('hide-defs')
 
@@ -1350,7 +1347,7 @@ class DreamPie(SimpleGladeApp):
         sv.modify_font(font)
         theme = tags.get_theme(self.config, self.config.get('current-theme'))
         tags.apply_theme_source(sv.get_buffer(), theme)
-    
+
     def on_preferences(self, _widget):
         cd = ConfigDialog(self.config, gladefile, self.window_main)
         r = cd.run()
@@ -1427,7 +1424,7 @@ class DreamPie(SimpleGladeApp):
             path.join(data_dir, 'dreampie.png')))
         d.run()
         d.destroy()
-    
+
     def on_update_available(self, is_git, latest_name, latest_time):
         date = time.strftime('%Y/%m/%d', time.localtime(latest_time))
         if is_git:
@@ -1438,40 +1435,40 @@ class DreamPie(SimpleGladeApp):
             msg = _("A new DreamPie version, %s, is available. "
                     "Click Help->Get New Version to update." % latest_name)
         self.status_bar.set_status(msg)
-    
+
     def on_get_update_menu_activate(self, _widget):
         webbrowser.open('http://www.dreampie.org/download.html')
-    
+
     def on_report_bug(self, _widget):
         bug_report.bug_report(self.window_main, gladefile, None)
-    
+
     def on_homepage(self, _widget):
         webbrowser.open('http://www.dreampie.org/')
-    
+
     def on_getting_started(self, _widget):
         self.show_getting_started_dialog()
-    
+
     def show_getting_started_dialog(self):
         d = get_widget('getting_started_dialog')
         d.set_transient_for(self.window_main)
         d.run()
         d.destroy()
-    
+
     def on_textview_button_press_event(self, _widget, event):
         if event.button == 3:
             self.show_popup_menu(event)
             return True
-        
+
         elif event.button == 2:
             return self.on_sourceview_button_press_event(_widget, event)
-        
+
         elif event.type == gdk._2BUTTON_PRESS:
             return self.on_double_click(event)
-    
+
     def show_popup_menu(self, event):
         tv = self.textview
         tb = self.textbuffer
-        
+
         if tb.get_has_selection():
             self.popup_sel_menu.popup(None, None, None, event.button,
                                       event.get_time())
@@ -1498,7 +1495,7 @@ class DreamPie(SimpleGladeApp):
                 self.save_section_menu.child.props.label = _('Save %s') % typ_s
                 self.view_section_menu.props.visible = \
                     bool(eval(self.config.get('viewer')))
-                
+
                 tb.move_mark(self.popup_mark, it)
                 self.popup_nosel_menu.popup(None, None, None, event.button,
                                             event.get_time())
@@ -1518,7 +1515,7 @@ def main():
                           help="Hide the console window")
 
     opts, args = parser.parse_args()
-    
+
     if len(args) > 1:
         parser.error("Can accept at most one argument")
     if len(args) == 1:
@@ -1536,8 +1533,8 @@ def main():
         sys.exit(1)
     else:
         pyexec = sys.executable
-        
-    
+
+
     if sys.platform == 'win32' and opts.hide_console:
         from .hide_console_window import hide_console_window
         hide_console_window()

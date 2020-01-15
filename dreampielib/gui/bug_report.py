@@ -1,17 +1,17 @@
 # Copyright 2012 Noam Yorav-Raphael
 #
 # This file is part of DreamPie.
-# 
+#
 # DreamPie is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # DreamPie is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with DreamPie.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -26,7 +26,6 @@ import gtk
 from gtk import glade
 
 from .. import __version__
-from .git import get_commit_details
 
 subp_pyexec = None
 subp_desc = None
@@ -45,8 +44,6 @@ def set_update_info(is_git, latest_name, latest_time, cur_time):
     _cur_time = cur_time
 
 def get_prefilled(trace):
-    commit_id, commit_time = get_commit_details()
-    commit_date = time.strftime('%Y/%m/%d', time.localtime(commit_time))
     s = """\
 What steps will reproduce the problem?
 1.
@@ -70,7 +67,6 @@ can go to imgur.com, upload the image, and paste the URL.
 Diagnostic information:
 
 DreamPie version: {version}
-git commit: {commit_id} from {commit_date}
 platform: {platform}
 architecture: {architecture}
 python_version: {python_version}
@@ -80,8 +76,6 @@ subprocess executable: {subp_pyexec}
 subprocess description: {subp_desc}
 
 """.format(version=__version__,
-           commit_id=commit_id,
-           commit_date=commit_date,
            platform=platform.platform(),
            architecture=platform.architecture(),
            python_version=platform.python_version(),
@@ -99,7 +93,7 @@ def get_update_message():
         return None
     if _latest_time <= _cur_time and _is_git:
         return None
-    
+
     if _latest_time > _cur_time:
         if _is_git:
             msg = """\
@@ -127,7 +121,7 @@ def bug_report(master_window, gladefile, trace):
     """
     Send the user to a bug report webpage, instructing him to paste a template
     with questions and diagnostics information.
-    
+
     master_window: gtk.Window, master of the dialog.
     gladefile: glade filename, for getting the widgets.
     trace: a string with the formatted traceback, or None.
@@ -138,7 +132,7 @@ def bug_report(master_window, gladefile, trace):
     update_label = xml.get_widget('update_label')
     d.set_transient_for(master_window)
     d.set_default_response(gtk.RESPONSE_OK)
-    
+
     prefilled = get_prefilled(trace)
     tb = bug_report_textview.get_buffer()
     tb.set_text(prefilled)
@@ -148,9 +142,9 @@ def bug_report(master_window, gladefile, trace):
         update_label.show()
     clipboard = gtk.Clipboard()
     clipboard.set_text(prefilled)
-    
+
     r = d.run()
     d.destroy()
-    
+
     if r == gtk.RESPONSE_OK:
         webbrowser.open('https://github.com/noamraph/dreampie/issues/new')

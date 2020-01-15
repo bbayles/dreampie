@@ -29,7 +29,7 @@ package_data_files = (['data/dreampie.glade',
                        'data/language-specs/def.lang',
                        'data/language-specs/language2.rng',
                        'data/language-specs/python.lang',
-                       ] + 
+                       ] +
                       [join('data', libfn, fn)
                        for libfn in subp_lib.lib_fns.values()
                        for fn in subp_lib.files])
@@ -40,7 +40,7 @@ if py2exe is not None:
     for fn in package_data_files:
         d.setdefault(os.path.dirname(fn), []).append(join('dreampielib', fn))
     additional_py2exe_data_files = d.items()
-    
+
     # Update setup.nsi
     mydir = os.path.dirname(os.path.abspath(__file__))
     template = open(join(mydir, 'setup.nsi.in')).read()
@@ -53,8 +53,8 @@ if py2exe is not None:
     f = open(join(mydir, 'setup.nsi'), 'w')
     f.write(setup_nsi)
     f.close()
-    
-    
+
+
 else:
     additional_py2exe_data_files = []
 
@@ -93,10 +93,10 @@ if py2exe is not None:
                              'pango', 'pygtk', 'runtime', 'comtypes.gen',
                              '_ssl', 'doctest', 'pdb', 'unittest', 'difflib',
                              'unicodedata', 'bz2', 'zipfile', 'lib2to3',
-                             'dulwich', 'dulwich.repo', 'win32api', 'win32con',
+                             'win32api', 'win32con',
                              'win32pipe', 'Carbon', 'Carbon.Files', 'decimal'],
                   'includes':['fnmatch', 'glob', 'ctypes.util'],
-                  
+
                  }},
     ))
 
